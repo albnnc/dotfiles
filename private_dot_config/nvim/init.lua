@@ -53,6 +53,12 @@ require('packer').startup(function()
       }
     } end
   }
+  use {
+    'neovim/nvim-lspconfig',
+    config = function()
+      require'lspconfig'.tsserver.setup{}
+    end
+  }
 end)
 
 opt.colorcolumn = '80'
@@ -60,6 +66,7 @@ opt.cursorline = true
 opt.whichwrap:append({h = true, l = true})
 opt.spelllang = {'en_us', 'ru'}
 opt.list = true
+opt.signcolumn = 'yes'
 opt.number = true
 opt.relativenumber = true
 opt.so = 999
