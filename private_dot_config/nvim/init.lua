@@ -27,11 +27,13 @@ require('packer').startup(function()
         prompt_prefix = '',
         selection_caret = '',
         border = false,
-        initial_mode = 'normal',
       },
       pickers = {
         find_files = {theme = 'dropdown'},
-        buffers = {theme = 'dropdown'},
+        buffers = {
+          theme = 'dropdown',
+          initial_mode = 'normal',
+        },
         live_grep = {theme = 'dropdown'},
       }
     } end
@@ -66,9 +68,9 @@ opt.cursorline = true
 opt.whichwrap:append({h = true, l = true})
 opt.spelllang = {'en_us', 'ru'}
 opt.list = true
-opt.signcolumn = 'yes'
 opt.number = true
 opt.relativenumber = true
+opt.signcolumn = 'yes'
 opt.so = 999
 opt.undofile = true
 opt.splitright = true
