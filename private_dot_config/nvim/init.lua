@@ -10,8 +10,39 @@ cmd [[packadd packer.nvim]]
 require('packer').startup(function()
   use 'wbthomason/packer.nvim'
   use 'mg979/vim-visual-multi'
-  use 'joshdick/onedark.vim'
+  use {
+    'navarasu/onedark.nvim',
+    config = function() require'onedark'.setup() end
+  }
   use 'b3nj5m1n/kommentary'
+  use {
+  'blackCauldron7/surround.nvim',
+    config = function() require'surround'.setup {
+      mappings_style = 'sandwich',
+      quotes = {"'", '"', '`'},
+      prefix = 'c',
+    } end
+  }
+  use {
+    'nvim-treesitter/nvim-treesitter',
+    run = ':TSUpdate',
+    config = function() require'nvim-treesitter.configs'.setup {
+      ensure_installed = {
+        'javascript',
+        'typescript',
+        'tsx',
+        'scss',
+        'css',
+        'html',
+        'json',
+        'yaml',
+        'lua',
+      },
+      highlight = {
+        enable = true
+      }
+    } end
+  }
   use {
     'nvim-lualine/lualine.nvim',
     requires = {'kyazdani42/nvim-web-devicons'},
@@ -23,18 +54,14 @@ require('packer').startup(function()
     'nvim-telescope/telescope.nvim',
     requires = {'nvim-lua/plenary.nvim'},
     config = function() require'telescope'.setup {
-      defaults = {
-        prompt_prefix = '',
-        selection_caret = '',
-        border = false,
-      },
       pickers = {
         find_files = {theme = 'dropdown'},
-        buffers = {
-          theme = 'dropdown',
-          initial_mode = 'normal',
-        },
         live_grep = {theme = 'dropdown'},
+        buffers = {theme = 'dropdown'},
+        lsp_references = {theme = 'dropdown'},
+        diagnostics = {theme = 'dropdown'},
+        git_commits = {theme = 'dropdown'},
+        git_branches = {theme = 'dropdown'},
       }
     } end
   }
@@ -58,12 +85,94 @@ require('packer').startup(function()
   use {
     'neovim/nvim-lspconfig',
     config = function()
-      require'lspconfig'.tsserver.setup{}
+      local nvim_lsp = require('lspconfig')
+      local on_attach = function(client, bufnr)
+        local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+        local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+        buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+        local opts = { noremap=true, silent=true }
+        buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+        buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+        buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+        buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+        buf_set_keymap('n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+        buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+        buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+      end
+      local tsserver_like_root_dir = function(fname)
+        local primary = nvim_lsp.util.root_pattern('package-lock.json')(fname)
+        local fallback = nvim_lsp.util.root_pattern('package.json', 'tsconfig.json')(fname)
+        return primary or fallback
+      end
+      local servers = {
+        {'tsserver', tsserver_like_root_dir},
+        {'eslint', tsserver_like_root_dir},
+        {'jsonls'},
+      }
+      for _, lsp in ipairs(servers) do
+        local options = {
+          on_attach = on_attach,
+          flags = {
+            debounce_text_changes = 150,
+          }
+        }
+        if lsp[2] then
+          options.root_dir = lsp[2]
+        end
+        nvim_lsp[lsp[1]].setup(options)
+      end
+    end
+  }
+  use 'hrsh7th/cmp-nvim-lsp'
+  use 'hrsh7th/cmp-buffer'
+  use 'hrsh7th/cmp-path'
+  use 'hrsh7th/cmp-cmdline'
+  use 'hrsh7th/cmp-vsnip'
+  use 'hrsh7th/vim-vsnip'
+  use {
+    'hrsh7th/nvim-cmp',
+    config = function()
+      local cmp = require'cmp'
+      cmp.setup {
+        snippet = {
+          expand = function(args)
+            vim.fn["vsnip#anonymous"](args.body)
+          end,
+        },
+        mapping = {
+          ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+          ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+          ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+          ['<C-y>'] = cmp.config.disable,
+          ['<C-e>'] = cmp.mapping({
+            i = cmp.mapping.abort(),
+            c = cmp.mapping.close(),
+          }),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        },
+        formatting = {
+          format = function(entry, vim_item)
+            vim_item.menu = ({
+              buffer = "[Buffer]",
+              nvim_lsp = "[LSP]",
+              luasnip = "[LuaSnip]",
+              nvim_lua = "[Lua]",
+              latex_symbols = "[LaTeX]",
+            })[entry.source.name]
+            return vim_item
+          end
+        },
+        sources = cmp.config.sources({
+          {name = 'nvim_lsp'},
+          {name = 'vsnip'},
+        }, {
+          {name = 'buffer'},
+        }),
+      }
     end
   }
 end)
 
-opt.colorcolumn = '80'
 opt.cursorline = true
 opt.whichwrap:append({h = true, l = true})
 opt.spelllang = {'en_us', 'ru'}
@@ -80,15 +189,7 @@ opt.expandtab = true
 opt.shiftwidth = 2
 opt.tabstop = 2
 opt.smartindent = true
-cmd([[
-  filetype indent plugin on
-  syntax enable
-]])
-
-cmd'colorscheme onedark'
-cmd(([[
-  highlight TelescopeBorder guifg=#3e4452
-]]))
+cmd [[syntax off]]
 
 map('', '<up>', ':echoe "Use k"<CR>', {noremap = true, silent = false})
 map('', '<down>', ':echoe "Use j"<CR>', {noremap = true, silent = false})
@@ -96,7 +197,11 @@ map('', '<left>', ':echoe "Use h"<CR>', {noremap = true, silent = false})
 map('', '<right>', ':echoe "Use l"<CR>', {noremap = true, silent = false})
 
 map('', 'fn', ':NvimTreeToggle<CR>', {noremap = true, silent = false})
-map('', 'fb', ':Telescope buffers<CR>', {noremap = true, silent = false})
-map('', 'ff', ':Telescope find_files<CR>', {noremap = true, silent = false})
+map('', 'fb', ':Telescope buffers<CR><Esc>', {noremap = true, silent = false})
 map('', 'fg', ':Telescope live_grep<CR>', {noremap = true, silent = false})
+map('', 'ff', ':Telescope find_files<CR>', {noremap = true, silent = false})
+map('', 'flr', ':Telescope lsp_references<CR><Esc>', {noremap = true, silent = false})
+map('', 'fld', ':Telescope diagnostics<CR><Esc>', {noremap = true, silent = false})
+map('', 'fgc', ':Telescope git_commits<CR><Esc>', {noremap = true, silent = false})
+map('', 'fgb', ':Telescope git_branches<CR><Esc>', {noremap = true, silent = false})
 
