@@ -107,7 +107,7 @@ require('packer').startup(function()
       local servers = {
         {'tsserver', tsserver_like_root_dir},
         {'eslint', tsserver_like_root_dir},
-        {'jsonls'},
+        -- {'jsonls'},
       }
       for _, lsp in ipairs(servers) do
         local options = {
@@ -189,12 +189,11 @@ opt.expandtab = true
 opt.shiftwidth = 2
 opt.tabstop = 2
 opt.smartindent = true
-cmd [[syntax off]]
 
-map('', '<up>', ':echoe "Use k"<CR>', {noremap = true, silent = false})
-map('', '<down>', ':echoe "Use j"<CR>', {noremap = true, silent = false})
-map('', '<left>', ':echoe "Use h"<CR>', {noremap = true, silent = false})
-map('', '<right>', ':echoe "Use l"<CR>', {noremap = true, silent = false})
+g.VM_maps = {Undo = 'u', Redo = '<C-r>'}
+g.VM_highlight_matches = 'hi! Search guibg=#3b3f4c'
+
+cmd [[syntax off]]
 
 map('', 'fn', ':NvimTreeToggle<CR>', {noremap = true, silent = false})
 map('', 'fb', ':Telescope buffers<CR><Esc>', {noremap = true, silent = false})
