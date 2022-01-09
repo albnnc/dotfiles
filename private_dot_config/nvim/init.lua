@@ -12,7 +12,7 @@ require('packer').startup(function()
   use 'mg979/vim-visual-multi'
   use {
     'navarasu/onedark.nvim',
-    config = function() require'onedark'.setup() end
+    config = function() require'onedark'.load() end
   }
   use 'b3nj5m1n/kommentary'
   use {
@@ -58,6 +58,7 @@ require('packer').startup(function()
         find_files = {theme = 'dropdown'},
         live_grep = {theme = 'dropdown'},
         buffers = {theme = 'dropdown'},
+        lsp_code_actions = {theme = 'cursor'},
         lsp_references = {theme = 'dropdown'},
         diagnostics = {theme = 'dropdown'},
         git_commits = {theme = 'dropdown'},
@@ -199,8 +200,8 @@ map('', 'fn', ':NvimTreeToggle<CR>', {noremap = true, silent = false})
 map('', 'fb', ':Telescope buffers<CR><Esc>', {noremap = true, silent = false})
 map('', 'fg', ':Telescope live_grep<CR>', {noremap = true, silent = false})
 map('', 'ff', ':Telescope find_files<CR>', {noremap = true, silent = false})
-map('', 'flr', ':Telescope lsp_references<CR><Esc>', {noremap = true, silent = false})
-map('', 'fld', ':Telescope diagnostics<CR><Esc>', {noremap = true, silent = false})
+map('', 'fa', ':Telescope lsp_code_actions<CR><Esc>', {noremap = true, silent = false})
+map('', 'fr', ':Telescope lsp_references<CR><Esc>', {noremap = true, silent = false})
+map('', 'fd', ':Telescope diagnostics<CR><Esc>', {noremap = true, silent = false})
 map('', 'fgc', ':Telescope git_commits<CR><Esc>', {noremap = true, silent = false})
 map('', 'fgb', ':Telescope git_branches<CR><Esc>', {noremap = true, silent = false})
-
