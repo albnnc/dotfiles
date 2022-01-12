@@ -174,6 +174,7 @@ require('packer').startup(function()
   }
 end)
 
+opt.mouse = 'a'
 opt.cursorline = true
 opt.whichwrap:append({h = true, l = true})
 opt.spelllang = {'en_us', 'ru'}
