@@ -191,6 +191,8 @@ opt.expandtab = true
 opt.shiftwidth = 2
 opt.tabstop = 2
 opt.smartindent = true
+opt.ignorecase = true
+opt.smartcase = true
 
 g.VM_maps = {Undo = 'u', Redo = '<C-r>'}
 g.VM_highlight_matches = 'hi! Search guibg=#3b3f4c'
