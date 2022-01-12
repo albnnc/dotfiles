@@ -201,7 +201,7 @@ cmd [[syntax off]]
 
 map('', 'fn', ':NvimTreeToggle<CR>', {noremap = true, silent = false})
 map('', 'fb', ':Telescope buffers<CR><Esc>', {noremap = true, silent = false})
-map('', 'fg', ':Telescope live_grep<CR>', {noremap = true, silent = false})
+map('', 'fs', ':Telescope live_grep<CR>', {noremap = true, silent = false})
 map('', 'ff', ':Telescope find_files<CR>', {noremap = true, silent = false})
 map('', 'fa', ':Telescope lsp_code_actions<CR><Esc>', {noremap = true, silent = false})
 map('', 'fr', ':Telescope lsp_references<CR><Esc>', {noremap = true, silent = false})
